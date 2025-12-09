@@ -1,0 +1,86 @@
+{% extends "base.html" %} {% block title %}My Profile - HMS{% endblock %} {% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-person"></i> My Profile</h1>
+    <p class="text-muted">View and update your profile information</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-circle"></i> Profile Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Name:</strong><br>
+                        <span class="text-light">{{ user.name }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Email:</strong><br>
+                        <span class="text-muted">{{ user.email }}</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Role:</strong><br>
+                        <span class="badge bg-info">{{ user.role.value|title }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Contact:</strong><br>
+                        <span class="text-muted">{{ user.contact or 'N/A' }}</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Status:</strong><br> {% if user.is_active %}
+                        <span class="badge bg-success">Active</span> {% else %}
+                        <span class="badge bg-danger">Inactive</span> {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Member Since:</strong><br>
+                        <span class="text-muted">{{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'N/A' }}</span>
+                    </div>
+                </div>
+
+                {% if user.role.value == 'doctor' and user.physician_profile %}
+                <hr>
+                <h6 class="mb-3"><i class="bi bi-person-badge"></i> Doctor Information</h6>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <strong>Specialization:</strong><br>
+                        <span class="badge bg-primary">
+                            {% if user.physician_profile.department %}
+                                {{ user.physician_profile.department.name }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <a href="{{ url_for('doctor.manage_availability') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-clock"></i> Manage Availability
+                </a>
+                {% endif %}
+
+                <hr>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Note:</strong> Profile editing is available through your role-specific dashboard. {% if user.role.value == 'patient' %}
+                    <a href="{{ url_for('patient.update_client_profile') }}" class="alert-link">Edit Profile</a> {% elif user.role.value == 'doctor' %} Contact admin to update your profile information. {% elif user.role.value == 'admin' %} You can manage your profile
+                    through the admin panel. {% endif %}
+                </div>
+
+                <hr>
+                <div class="d-flex justify-content-end">
+                    <a href="{{ url_for('auth.handle_logout_request') }}" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

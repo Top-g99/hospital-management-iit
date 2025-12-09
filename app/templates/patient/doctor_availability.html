@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor's Availability - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-calendar-check"></i> Doctor's Availability</h1>
+    <p class="text-muted">Dr. {{ doctor.name }}</p>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            {% for day_info in date_list %}
+                {% set day_slots = availability.get(day_info.date_str, []) %}
+                {% set morning_slots = ['08:00', '09:00', '10:00', '11:00', '12:00'] %}
+                {% set evening_slots = ['16:00', '17:00', '18:00', '19:00', '20:00', '21:00'] %}
+                {% set has_morning = false %}
+                {% set has_evening = false %}
+                {% for slot in morning_slots %}
+                {% if slot in day_slots %}
+                {% set has_morning = true %}
+                {% endif %}
+                {% endfor %}
+                {% for slot in evening_slots %}
+                {% if slot in day_slots %}
+                {% set has_evening = true %}
+                {% endif %}
+                {% endfor %}
+                
+                <div class="col-md-6 mb-3">
+                    <div class="card border">
+                        <div class="card-body">
+                            <h6 class="mb-3">{{ day_info.date_display }}</h6>
+                            <div class="d-flex gap-2">
+                                {% if has_morning %}
+                                <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id, date=day_info.date_str, time='09:00') }}" 
+                                   class="btn btn-success flex-fill">
+                                    08:00 - 12:00 am
+                                </a>
+                                {% else %}
+                                <button type="button" class="btn btn-outline-danger flex-fill" disabled>
+                                    08:00 - 12:00 am
+                                </button>
+                                {% endif %}
+                                
+                                {% if has_evening %}
+                                <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id, date=day_info.date_str, time='17:00') }}" 
+                                   class="btn btn-success flex-fill">
+                                    04:00 - 9:00 pm
+                                </a>
+                                {% else %}
+                                <button type="button" class="btn btn-outline-danger flex-fill" disabled>
+                                    04:00 - 9:00 pm
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="text-end mt-3">
+            <a href="{{ url_for('patient.display_client_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

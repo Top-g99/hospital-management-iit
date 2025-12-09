@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Patient History - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-clock-history"></i> Patient History</h1>
+        <p class="text-muted mb-0">
+            Patient Name: 
+            {% if current_user.patient_profile and current_user.patient_profile.gender == 'Male' %}
+                Mr. {{ current_user.name }}
+            {% elif current_user.patient_profile and current_user.patient_profile.gender == 'Female' %}
+                Miss. {{ current_user.name }}
+            {% else %}
+                {{ current_user.name }}
+            {% endif %}
+        </p>
+        {% if completed_appointments and completed_appointments[0] %}
+        <p class="text-muted mb-0">
+            Doctor's Name: {{ completed_appointments[0].doctor.name }}
+        </p>
+        <p class="text-muted mb-0">
+            Department: 
+            {% if completed_appointments[0].doctor.physician_profile and completed_appointments[0].doctor.physician_profile.department %}
+                {{ completed_appointments[0].doctor.physician_profile.department.name }}
+            {% else %}
+                N/A
+            {% endif %}
+        </p>
+        {% endif %}
+    </div>
+    <a href="{{ url_for('patient.display_client_dashboard') }}" class="btn btn-primary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-file-medical"></i> Treatment History</h5>
+            </div>
+            <div class="card-body">
+                {% if completed_appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Visit No.</th>
+                                <th>Visit Type</th>
+                                <th>Tests Done</th>
+                                <th>Diagnosis</th>
+                                <th>Prescription</th>
+                                <th>Medicines</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set visit_count = 0 %}
+                            {% for appointment in completed_appointments %}
+                            {% if appointment.treatment_record %}
+                            {% set visit_count = visit_count + 1 %}
+                            <tr>
+                                <td>{{ visit_count }}</td>
+                                <td>{{ appointment.treatment_record.visit_type or 'In-person' }}</td>
+                                <td>{{ appointment.treatment_record.tests_done or 'N/A' }}</td>
+                                <td>{{ appointment.treatment_record.diagnosis or 'N/A' }}</td>
+                                <td>{{ appointment.treatment_record.prescription or 'N/A' }}</td>
+                                <td>{{ appointment.treatment_record.medicines or 'N/A' }}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if visit_count == 0 %}
+                <p class="text-muted text-center py-4">No treatment history available.</p>
+                {% endif %}
+                {% else %}
+                <p class="text-muted text-center py-4">No treatment history available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

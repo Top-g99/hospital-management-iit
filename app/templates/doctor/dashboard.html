@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard - HMS{% endblock %}
+
+{% block content %}
+<div class="text-center mb-3">
+    <h1>Doctors' Dashboard</h1>
+</div>
+<div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3>Welcome Dr. {{ current_user.name }}</h3>
+    </div>
+    <a href="{{ url_for('auth.handle_logout_request') }}" class="btn btn-outline-danger">
+        <i class="bi bi-box-arrow-right"></i> Logout
+    </a>
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Upcoming Appointments</h5>
+            </div>
+            <div class="card-body">
+                {% if week_appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Patient Name</th>
+                                <th>Patient History</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in week_appointments %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    {% if appointment.patient.patient_profile and appointment.patient.patient_profile.gender == 'Male' %}
+                                        Mr. {{ appointment.patient.name }}
+                                    {% elif appointment.patient.patient_profile and appointment.patient.patient_profile.gender == 'Female' %}
+                                        Miss. {{ appointment.patient.name }}
+                                    {% else %}
+                                        {{ appointment.patient.name }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('doctor.view_patient', patient_id=appointment.patient.id) }}" 
+                                       class="btn btn-sm btn-primary">
+                                        View
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if appointment.status.value == 'Booked' %}
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('doctor.complete_appointment', id=appointment.id) }}" 
+                                           class="btn btn-sm btn-info" title="Update">
+                                            <i class="bi bi-pencil"></i> Update
+                                        </a>
+                                        <a href="{{ url_for('doctor.complete_appointment', id=appointment.id) }}" 
+                                           class="btn btn-sm btn-success" title="Mark as Complete">
+                                            <i class="bi bi-check-circle"></i> Mark as Complete
+                                        </a>
+                                        <form method="POST" action="{{ url_for('doctor.cancel_physician_appointment', id=appointment.id) }}" 
+                                              class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Cancel">
+                                                <i class="bi bi-x-circle"></i> Cancel
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% else %}
+                                    <a href="{{ url_for('doctor.view_appointment', id=appointment.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-4">No upcoming appointments found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assigned Patients -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-people"></i> Assigned Patients</h5>
+            </div>
+            <div class="card-body">
+                {% if assigned_patients %}
+                <div class="d-flex flex-column gap-2 mb-3">
+                    {% for patient in assigned_patients %}
+                    <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                        <span class="fw-bold">
+                            {% if patient.patient_profile and patient.patient_profile.gender == 'Male' %}
+                                Mr. {{ patient.name }}
+                            {% elif patient.patient_profile and patient.patient_profile.gender == 'Female' %}
+                                Miss. {{ patient.name }}
+                            {% else %}
+                                {{ patient.name }}
+                            {% endif %}
+                        </span>
+                        <a href="{{ url_for('doctor.view_patient', patient_id=patient.id) }}" 
+                           class="btn btn-sm btn-info">
+                            View
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="text-end">
+                    <a href="{{ url_for('doctor.manage_availability') }}" class="btn btn-success">
+                        <i class="bi bi-calendar-check"></i> Provide Availability
+                    </a>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-4">No patients assigned yet.</p>
+                <div class="text-end">
+                    <a href="{{ url_for('doctor.manage_availability') }}" class="btn btn-success">
+                        <i class="bi bi-calendar-check"></i> Provide Availability
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

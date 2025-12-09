@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block title %}Register - HMS{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"> {% endblock %} {% block content_wrapper %} {% block content %}
+<div class="notification-container" role="alert" aria-live="polite" aria-atomic="true">
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
+    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+        <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' }}" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close notification"></button>
+    </div>
+    {% endfor %} {% endif %} {% endwith %}
+</div>
+
+<div class="login-split-layout register-page">
+    <div class="login-form-section">
+        <div class="login-form-container">
+            <h1 class="login-page-title">Register</h1>
+
+            <form method="POST" action="{{ url_for('auth.handle_registration_request') }}" novalidate class="login-form-element" aria-label="Registration form">
+                <div class="input-field-group">
+                    <label for="username" class="input-label-text">Username</label>
+                    <div class="input-container">
+                        <i class="bi bi-person input-icon-element" aria-hidden="true"></i>
+                        <input type="text" class="input-field" id="username" name="username" placeholder="Enter your username" required autofocus aria-required="true">
+                    </div>
+                </div>
+
+                <div class="input-field-group">
+                    <label for="password" class="input-label-text">Password</label>
+                    <div class="input-container">
+                        <i class="bi bi-lock input-icon-element" aria-hidden="true"></i>
+                        <input type="password" class="input-field" id="password" name="password" placeholder="Enter password (min 6 characters)" required minlength="6" aria-required="true">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button-primary" aria-label="Submit registration form">
+                    REGISTER
+                </button>
+            </form>
+
+            <div class="login-page-footer">
+                <p>Already have an account? <a href="{{ url_for('auth.handle_login_request') }}" class="registration-link">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="promo-section">
+        <div class="promo-text-container">
+            <h2 class="promo-heading">Patients can register to book appointments and manage their health records.</h2>
+            <a href="#" class="info-link" aria-label="Learn more about the system">LEARN MORE</a>
+        </div>
+        <div class="pattern-background" aria-hidden="true"></div>
+    </div>
+</div>
+{% endblock %} {% endblock %} {% block extra_js %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}

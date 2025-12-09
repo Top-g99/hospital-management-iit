@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ doctor.name }} - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-person-badge"></i> {{ doctor.name }}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="mb-3">
+                            {% if doctor.physician_profile and doctor.physician_profile.department %}
+                                {{ doctor.physician_profile.department.name }}
+                            {% else %}
+                                Medical Professional
+                            {% endif %}
+                        </h5>
+                        <p class="mb-2">
+                            <strong>Specialization:</strong> 
+                            {% if doctor.physician_profile and doctor.physician_profile.department %}
+                                {{ doctor.physician_profile.department.name }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </p>
+                        <p class="mb-2">
+                            <strong>Experience:</strong> 
+                            {% if doctor.physician_profile and doctor.physician_profile.experience_years %}
+                                {{ doctor.physician_profile.experience_years }} Years Experience Overall
+                                {% if doctor.physician_profile.experience_years >= 5 %}
+                                    ({{ doctor.physician_profile.experience_years - 5 }} years as specialist)
+                                {% endif %}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </p>
+                        <p class="mb-0">
+                            Dr. {{ doctor.name }} is a 
+                            {% if doctor.physician_profile and doctor.physician_profile.department %}
+                                {{ doctor.physician_profile.department.name }} specialist
+                            {% else %}
+                                medical professional
+                            {% endif %}
+                            {% if doctor.physician_profile and doctor.physician_profile.experience_years %}
+                                with an experience of {{ doctor.physician_profile.experience_years }} years in this field.
+                            {% else %}
+                                .
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center" 
+                             style="width: 120px; height: 120px;">
+                            <i class="bi bi-person-circle" style="font-size: 5rem; color: #ccc;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between">
+    <a href="{{ url_for('patient.view_doctor_availability', doctor_id=doctor.id) }}" 
+       class="btn btn-success">
+        Check Availability
+    </a>
+    <a href="{{ url_for('patient.display_client_dashboard') }}" 
+       class="btn btn-outline-secondary">
+        Go Back
+    </a>
+</div>
+{% endblock %}
+

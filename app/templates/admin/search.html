@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Search - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-search"></i> Search</h1>
+    <p class="text-muted">Search for patients (by name, ID, email, or contact) or doctors (by name or specialization)</p>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('admin.perform_search') }}" class="row g-3">
+            <div class="col-md-8">
+                <label for="q" class="form-label">Search Query</label>
+                <input type="text" class="form-control" id="q" name="q" 
+                       value="{{ results.query }}" 
+                       placeholder="Enter name, ID, email, specialization, or contact...">
+            </div>
+            <div class="col-md-3">
+                <label for="type" class="form-label">Search Type</label>
+                <select class="form-select" id="type" name="type">
+                    <option value="all" {% if results.type == 'all' %}selected{% endif %}>All</option>
+                    <option value="doctors" {% if results.type == 'doctors' %}selected{% endif %}>Doctors Only</option>
+                    <option value="patients" {% if results.type == 'patients' %}selected{% endif %}>Patients Only</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if results.query %}
+<div class="row">
+    <!-- Doctors Results -->
+    {% if results.type in ['all', 'doctors'] %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-badge"></i> Doctors 
+                    <span class="badge bg-primary">{{ results.doctors|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if results.doctors %}
+                <div class="list-group">
+                    {% for doctor in results.doctors %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ doctor.name }}</h6>
+                                <small class="text-muted">{{ doctor.email }}</small><br>
+                                <small>
+                                    <span class="badge bg-info">
+                                        {% if doctor.physician_profile and doctor.physician_profile.department %}
+                                            {{ doctor.physician_profile.department.name }}
+                                        {% else %}
+                                            No specialization
+                                        {% endif %}
+                                    </span>
+                                </small>
+                            </div>
+                            <a href="{{ url_for('admin.modify_physician_profile', doctor_id=doctor.id) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No doctors found matching your search.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Patients Results -->
+    {% if results.type in ['all', 'patients'] %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-people"></i> Patients 
+                    <span class="badge bg-success">{{ results.patients|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if results.patients %}
+                <div class="list-group">
+                    {% for patient in results.patients %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ patient.name }}</h6>
+                                <small class="text-muted">
+                                    <strong>ID:</strong> {{ patient.id }} | 
+                                    <strong>Email:</strong> {{ patient.email }}
+                                </small><br>
+                                {% if patient.contact %}
+                                <small class="text-muted"><strong>Contact:</strong> {{ patient.contact }}</small>
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('admin.view_patient_details', patient_id=patient.id) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No patients found matching your search.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if not results.doctors and not results.patients and results.query %}
+<div class="alert alert-info text-center">
+    <i class="bi bi-info-circle"></i> No results found for "{{ results.query }}". Try a different search term.
+</div>
+{% endif %}
+
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-search" style="font-size: 4rem; color: #ccc;"></i>
+        <p class="text-muted mt-3">Enter a search query above to find doctors or patients.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

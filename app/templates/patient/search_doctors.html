@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Search Doctors - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-search"></i> Search Doctors</h1>
+    <p class="text-muted">Find doctors by name, specialization, or availability</p>
+</div>
+
+<!-- Search Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('patient.search_physicians') }}" class="row g-3">
+            <div class="col-md-3">
+                <label for="name" class="form-label">Doctor Name</label>
+                <input type="text" class="form-control" id="name" name="name" 
+                       value="{{ selected_name }}" 
+                       placeholder="Search by doctor name...">
+            </div>
+            <div class="col-md-3">
+                <label for="specialization" class="form-label">Specialization</label>
+                <select class="form-select" id="specialization" name="specialization">
+                    <option value="">All Specializations</option>
+                    {% for dept in specializations %}
+                    <option value="{{ dept.id }}" {% if selected_specialization == dept.id|string %}selected{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="date" class="form-label">Available On Date</label>
+                <input type="date" class="form-control" id="date" name="date" 
+                       value="{{ selected_date }}" min="{{ today.strftime('%Y-%m-%d') }}" 
+                       max="{{ (today + timedelta(days=7)).strftime('%Y-%m-%d') if today else '' }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Doctors Results -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-person-badge"></i> Available Doctors
+            <span class="badge bg-primary">{{ doctors|length }}</span>
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if doctors %}
+        <div class="row">
+            {% for doctor_info in doctors %}
+            {% set doctor = doctor_info.doctor %}
+            <div class="col-md-6 mb-4">
+                <div class="card border h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-person-badge"></i> {{ doctor.name }}
+                        </h5>
+                        <p class="card-text">
+                            <strong>Email:</strong> {{ doctor.email }}<br>
+                            <strong>Contact:</strong> {{ doctor.contact or 'N/A' }}<br>
+                            <strong>Specialization:</strong> 
+                            <span class="badge bg-info">
+                                {% if doctor.physician_profile and doctor.physician_profile.department %}
+                                    {{ doctor.physician_profile.department.name }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </span>
+                        </p>
+                        
+                        {% if doctor_info.available_slots %}
+                        <div class="mb-3">
+                            <strong>Available Time Slots:</strong>
+                            <div class="mt-2">
+                                {% for slot in doctor_info.available_slots %}
+                                <span class="badge bg-success me-1">{{ slot }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id, date=selected_date) }}" 
+                           class="btn btn-primary">
+                            <i class="bi bi-calendar-plus"></i> Book Appointment
+                        </a>
+                        {% elif doctor_info.next_available %}
+                        <div class="mb-3">
+                            <strong>Next Available:</strong> {{ doctor_info.next_available.strftime('%B %d, %Y') }}
+                        </div>
+                        <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" 
+                           class="btn btn-primary">
+                            <i class="bi bi-calendar-plus"></i> Book Appointment
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" 
+                           class="btn btn-primary">
+                            <i class="bi bi-calendar-plus"></i> Book Appointment
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-person-x" style="font-size: 4rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No doctors found matching your criteria.</p>
+            <a href="{{ url_for('patient.search_physicians') }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Clear Filters
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

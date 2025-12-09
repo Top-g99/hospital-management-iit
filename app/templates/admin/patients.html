@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Patients - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-people"></i> Manage Patients</h1>
+        <p class="text-muted">View and manage patient profiles</p>
+    </div>
+    <a href="{{ url_for('admin.perform_search') }}" class="btn btn-outline-primary">
+        <i class="bi bi-search"></i> Search
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-list-ul"></i> All Patients</h5>
+    </div>
+    <div class="card-body">
+        {% if patients %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Gender</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td><strong>{{ patient.name }}</strong></td>
+                        <td>{{ patient.email }}</td>
+                        <td>{{ patient.contact or 'N/A' }}</td>
+                        <td>{{ patient.patient_profile.gender if patient.patient_profile else 'N/A' }}</td>
+                        <td>
+                            {% if patient.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Blacklisted</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('admin.view_patient_details', patient_id=patient.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="{{ url_for('admin.modify_patient_profile', patient_id=patient.id) }}" 
+                                   class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.deactivate_patient', patient_id=patient.id) }}" 
+                                      class="d-inline"
+                                      onsubmit="return confirm('Are you sure you want to blacklist this patient?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-x-circle"></i> Blacklist
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-person-x" style="font-size: 4rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No patients found.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

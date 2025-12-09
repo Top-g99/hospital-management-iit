@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Doctor - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-pencil"></i> Edit Doctor</h1>
+    <p class="text-muted">Update doctor profile information</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-badge"></i> Doctor Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.modify_physician_profile', doctor_id=doctor.id) }}" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">
+                                <i class="bi bi-person"></i> Full Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ doctor.name }}" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <i class="bi bi-envelope"></i> Email Address <span class="text-danger">*</span>
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ doctor.email }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock"></i> New Password (leave blank to keep current)
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="Enter new password">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="contact" class="form-label">
+                                <i class="bi bi-telephone"></i> Contact Number
+                            </label>
+                            <input type="tel" class="form-control" id="contact" name="contact" 
+                                   value="{{ doctor.contact or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="specialization_id" class="form-label">
+                            <i class="bi bi-hospital"></i> Specialization <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="specialization_id" name="specialization_id" required>
+                            <option value="">Select Specialization</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}" 
+                                    {% if doctor.physician_profile and doctor.physician_profile.specialization_id == dept.id %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.list_all_physicians') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Update Doctor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

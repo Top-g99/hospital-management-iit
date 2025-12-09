@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-calendar-plus"></i> Book Appointment</h1>
+    <p class="text-muted">Schedule an appointment with a doctor</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Appointment Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('patient.create_appointment') }}" novalidate>
+                    <div class="mb-3">
+                        <label for="specialization" class="form-label">
+                            <i class="bi bi-hospital"></i> Specialization
+                        </label>
+                        <select class="form-select" id="specialization" name="specialization" 
+                                onchange="window.location.href='{{ url_for('patient.create_appointment') }}?specialization='+this.value">
+                            <option value="">Select Specialization</option>
+                            {% for dept in specializations %}
+                            <option value="{{ dept.id }}" {% if selected_specialization == dept.id|string %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="doctor_id" class="form-label">
+                            <i class="bi bi-person-badge"></i> Select Doctor <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="doctor_id" name="doctor_id" required>
+                            <option value="">Select Doctor</option>
+                            {% for doctor in doctors %}
+                            <option value="{{ doctor.id }}" {% if selected_doctor_id == doctor.id|string %}selected{% endif %}>
+                                {{ doctor.name }} 
+                                {% if doctor.physician_profile and doctor.physician_profile.department %}
+                                    - {{ doctor.physician_profile.department.name }}
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if not doctors %}
+                        <div class="form-text">
+                            <a href="{{ url_for('patient.search_physicians') }}">Search for available doctors</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label">
+                                <i class="bi bi-calendar"></i> Date <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" id="date" name="date" 
+                                   min="{{ today.strftime('%Y-%m-%d') }}" 
+                                   max="{{ (today + timedelta(days=7)).strftime('%Y-%m-%d') }}" 
+                                   required onchange="updateTimeSlots()">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="time" class="form-label">
+                                <i class="bi bi-clock"></i> Time <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="time" name="time" required>
+                                <option value="">Select Time</option>
+                            </select>
+                            <div class="form-text" id="timeHelp">Select a doctor and date first</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">
+                            <i class="bi bi-sticky"></i> Notes (Optional)
+                        </label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                  placeholder="Any additional information or symptoms..."></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> You can only book appointments for the next 7 days. Make sure the doctor is available at your selected time.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('patient.display_client_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Book Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateTimeSlots() {
+        const doctorSelect = document.getElementById('doctor_id');
+        const dateInput = document.getElementById('date');
+        const timeSelect = document.getElementById('time');
+        const timeHelp = document.getElementById('timeHelp');
+        
+        const doctorId = doctorSelect.value;
+        const selectedDate = dateInput.value;
+        
+        if (!doctorId || !selectedDate) {
+            timeSelect.innerHTML = '<option value="">Select Time</option>';
+            timeHelp.textContent = 'Select a doctor and date first';
+            return;
+        }
+        
+        // Fetch doctor availability (this would need an API endpoint in a real app)
+        // For now, we'll use common time slots
+        const commonSlots = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
+        
+        timeSelect.innerHTML = '<option value="">Select Time</option>';
+        commonSlots.forEach(slot => {
+            const option = document.createElement('option');
+            option.value = slot;
+            option.textContent = slot;
+            timeSelect.appendChild(option);
+        });
+        
+        timeHelp.textContent = 'Select an available time slot';
+    }
+    
+    document.getElementById('doctor_id').addEventListener('change', updateTimeSlots);
+</script>
+{% endblock %}
+

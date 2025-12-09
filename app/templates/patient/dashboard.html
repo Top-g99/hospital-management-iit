@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Patients' Dashboard - HMS{% endblock %}
+
+{% block content %}
+<div class="text-center mb-3">
+    <h1>Patients' Dashboard</h1>
+</div>
+
+<div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3>Welcome {{ current_user.name }}</h3>
+    </div>
+    <div>
+        <a href="{{ url_for('patient.update_client_profile') }}" class="text-decoration-none me-3">edit profile</a>
+        <span class="text-muted">|</span>
+        <a href="{{ url_for('patient.view_treatment_history') }}" class="text-decoration-none me-3 ms-3">History</a>
+        <span class="text-muted">|</span>
+        <a href="{{ url_for('auth.handle_logout_request') }}" class="text-decoration-none ms-3">logout</a>
+    </div>
+</div>
+
+<!-- Departments Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-hospital"></i> Departments</h5>
+            </div>
+            <div class="card-body">
+                {% if specializations %}
+                <div class="d-flex flex-wrap gap-3">
+                    {% for dept in specializations %}
+                    <div class="card border" style="min-width: 200px;">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">{{ dept.name }}</span>
+                            <a href="{{ url_for('patient.view_department', department_id=dept.id) }}" 
+                               class="btn btn-sm btn-primary">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-4">No departments available at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Upcoming Appointments</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Doctor Name</th>
+                                <th>Deptt</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in upcoming_appointments %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ appointment.doctor.name }}</td>
+                                <td>
+                                    {% if appointment.doctor.physician_profile and appointment.doctor.physician_profile.department %}
+                                        {{ appointment.doctor.physician_profile.department.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>{{ appointment.date.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    {% set time_str = appointment.time.strftime('%I:%M %p') %}
+                                    {% if '08:00' <= appointment.time.strftime('%H:%M') <= '12:00' %}
+                                        08 am - 12 pm
+                                    {% elif '16:00' <= appointment.time.strftime('%H:%M') <= '21:00' %}
+                                        04 pm - 9 pm
+                                    {% else %}
+                                        {{ time_str }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if appointment.status.value == 'Booked' %}
+                                    <form method="POST" action="{{ url_for('patient.cancel_client_appointment', id=appointment.id) }}" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            Cancel
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-4">No upcoming appointments found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

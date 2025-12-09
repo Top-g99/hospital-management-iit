@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Doctor Availability - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-clock"></i> Manage Doctor Availability</h1>
+    <p class="text-muted">Set availability for Dr. {{ doctor.name }} for the next 7 days</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Availability Schedule</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('admin.manage_physician_availability', doctor_id=doctor.id) }}">
+            <div class="row">
+                {% for day_info in date_list %}
+                    {% set day_slots = availability.get(day_info.date_str, []) %}
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="card border">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-calendar-day"></i> {{ day_info.date_display }}
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2">
+                                    {% set time_slots = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'] %}
+                                    {% for slot in time_slots %}
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="slots_{{ day_info.date_str }}" 
+                                                   value="{{ slot }}" 
+                                                   id="slot_{{ day_info.date_str }}_{{ slot }}"
+                                                   {% if slot in day_slots %}checked{% endif %}>
+                                            <label class="form-check-label" for="slot_{{ day_info.date_str }}_{{ slot }}">
+                                                {{ slot }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> <strong>Note:</strong> Check the time slots when the doctor is available. Unchecked slots mean the doctor is not available at that time.
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin.list_all_physicians') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Save Availability
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

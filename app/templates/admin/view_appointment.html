@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}View Appointment - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-calendar-check"></i> Appointment Details</h1>
+    <p class="text-muted">View and manage appointment information</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Appointment Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Date:</strong> {{ appointment.date.strftime('%B %d, %Y') }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Time:</strong> {{ appointment.time.strftime('%I:%M %p') }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Status:</strong> 
+                        <span class="badge status-{{ appointment.status.value.lower() }}">
+                            {{ appointment.status.value }}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Created:</strong> {{ appointment.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    </div>
+                </div>
+                {% if appointment.notes %}
+                <div class="mb-3">
+                    <strong>Notes:</strong>
+                    <p class="mt-2">{{ appointment.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Patient Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ appointment.patient.name }}</p>
+                <p><strong>Email:</strong> {{ appointment.patient.email }}</p>
+                <p><strong>Contact:</strong> {{ appointment.patient.contact or 'N/A' }}</p>
+                <a href="{{ url_for('admin.view_patient_details', patient_id=appointment.patient.id) }}" 
+                   class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> View Patient Profile
+                </a>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-badge"></i> Doctor Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ appointment.doctor.name }}</p>
+                <p><strong>Email:</strong> {{ appointment.doctor.email }}</p>
+                <p><strong>Specialization:</strong> 
+                    {% if appointment.doctor.physician_profile and appointment.doctor.physician_profile.department %}
+                        {{ appointment.doctor.physician_profile.department.name }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        {% if appointment.treatment %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-file-medical"></i> Visit Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong><i class="bi bi-clipboard-pulse"></i> Diagnosis:</strong>
+                    <p class="mt-2 mb-0">{{ appointment.treatment.diagnosis }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <strong><i class="bi bi-capsule"></i> Prescription:</strong>
+                    {% if appointment.treatment.prescription %}
+                    <p class="mt-2 mb-0">{{ appointment.treatment.prescription }}</p>
+                    {% else %}
+                    <p class="mt-2 mb-0 text-muted"><em>No prescription provided</em></p>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <strong><i class="bi bi-sticky"></i> Doctor Notes:</strong>
+                    {% if appointment.treatment.notes %}
+                    <p class="mt-2 mb-0">{{ appointment.treatment.notes }}</p>
+                    {% else %}
+                    <p class="mt-2 mb-0 text-muted"><em>No additional notes</em></p>
+                    {% endif %}
+                </div>
+                
+                <hr>
+                <p class="text-muted small mb-0">
+                    <strong>Record Created:</strong> {{ appointment.treatment.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-file-medical"></i> Visit Information</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted text-center py-3">
+                    <i class="bi bi-info-circle"></i> Treatment information will be available after the doctor completes this appointment.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-gear"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.update_appointment_status', appointment_id=appointment.id) }}">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Update Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="Booked" {% if appointment.status.value == 'Booked' %}selected{% endif %}>Booked</option>
+                            <option value="Completed" {% if appointment.status.value == 'Completed' %}selected{% endif %}>Completed</option>
+                            <option value="Cancelled" {% if appointment.status.value == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-circle"></i> Update Status
+                    </button>
+                </form>
+                
+                <hr>
+                
+                <a href="{{ url_for('admin.list_all_appointments') }}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left"></i> Back to Appointments
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

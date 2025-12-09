@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Reschedule Appointment - HMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="bi bi-arrow-repeat"></i> Reschedule Appointment</h1>
+    <p class="text-muted">Change the date and time of your appointment</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Current Appointment</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Date:</strong> {{ appointment.date.strftime('%B %d, %Y') }}</p>
+                <p><strong>Time:</strong> {{ appointment.time.strftime('%I:%M %p') }}</p>
+                <p><strong>Doctor:</strong> {{ appointment.doctor.name }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-check"></i> New Appointment Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('patient.reschedule_client_appointment', id=appointment.id) }}" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label">
+                                <i class="bi bi-calendar"></i> New Date <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control" id="date" name="date" 
+                                   min="{{ today.strftime('%Y-%m-%d') }}" 
+                                   max="{{ (today + timedelta(days=7)).strftime('%Y-%m-%d') }}" 
+                                   required onchange="updateTimeSlots()">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="time" class="form-label">
+                                <i class="bi bi-clock"></i> New Time <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="time" name="time" required>
+                                <option value="">Select Time</option>
+                            </select>
+                            <div class="form-text" id="timeHelp">Select a date first</div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> Make sure the doctor is available at your selected time. You can only reschedule for the next 7 days.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('patient.view_appointment', id=appointment.id) }}" 
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Reschedule Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateTimeSlots() {
+        const dateInput = document.getElementById('date');
+        const timeSelect = document.getElementById('time');
+        const timeHelp = document.getElementById('timeHelp');
+        
+        const selectedDate = dateInput.value;
+        
+        if (!selectedDate) {
+            timeSelect.innerHTML = '<option value="">Select Time</option>';
+            timeHelp.textContent = 'Select a date first';
+            return;
+        }
+        
+        // Common time slots (in a real app, fetch from doctor's availability)
+        const commonSlots = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
+        
+        timeSelect.innerHTML = '<option value="">Select Time</option>';
+        commonSlots.forEach(slot => {
+            const option = document.createElement('option');
+            option.value = slot;
+            option.textContent = slot;
+            timeSelect.appendChild(option);
+        });
+        
+        timeHelp.textContent = 'Select an available time slot';
+    }
+</script>
+{% endblock %}
+

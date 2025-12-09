@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block title %}Sign In - HMS{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"> {% endblock %} {% block content_wrapper %} {% block content %}
+<div class="notification-container" role="alert" aria-live="polite" aria-atomic="true">
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %}
+    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+        <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' }}" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close notification"></button>
+    </div>
+    {% endfor %} {% endif %} {% endwith %}
+</div>
+
+<div class="login-split-layout">
+    <div class="login-form-section">
+        <div class="login-form-container">
+            <h1 class="login-page-title">Sign In</h1>
+
+            <form method="POST" action="{{ url_for('auth.handle_login_request') }}" novalidate class="login-form-element" aria-label="Sign in form">
+                <div class="input-field-group">
+                    <label for="email" class="input-label-text">User Name</label>
+                    <div class="input-container">
+                        <i class="bi bi-envelope input-icon-element" aria-hidden="true"></i>
+                        <input type="email" class="input-field" id="email" name="email" placeholder="Enter your email" required autofocus aria-required="true" aria-describedby="email-help">
+                    </div>
+                </div>
+
+                <div class="input-field-group">
+                    <label for="password" class="input-label-text">Password</label>
+                    <div class="input-container">
+                        <i class="bi bi-lock input-icon-element" aria-hidden="true"></i>
+                        <input type="password" class="input-field" id="password" name="password" placeholder="Enter Password" required aria-required="true" aria-describedby="password-help">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button-primary" aria-label="Submit sign in form">
+                    SIGN IN
+                </button>
+            </form>
+
+            <div class="login-page-footer">
+                <p>Do not have an account? <a href="{{ url_for('auth.handle_registration_request') }}" class="registration-link">Register</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="promo-section">
+        <div class="promo-text-container">
+            <h2 class="promo-heading">A new way to experience healthcare management in the digital space.</h2>
+            <a href="#" class="info-link" aria-label="Learn more about the system">LEARN MORE</a>
+        </div>
+        <div class="pattern-background" aria-hidden="true"></div>
+    </div>
+</div>
+{% endblock %} {% endblock %} {% block extra_js %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}
